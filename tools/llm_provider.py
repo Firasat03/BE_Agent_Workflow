@@ -82,18 +82,43 @@ class OpenAIProvider(LLMProvider):
         self._max_tokens = generation_config.get("max_output_tokens", 8192)
 
     def generate(self, system_prompt: str, user_prompt: str) -> tuple[str, int]:
-        response = self._client.chat.completions.create(
-            model=self._model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user",   "content": user_prompt},
-            ],
-            temperature=self._temperature,
-            max_tokens=self._max_tokens,
-        )
-        text = response.choices[0].message.content.strip()
-        tokens = response.usage.total_tokens if response.usage else 0
-        return text, tokens
+        import time, re
+        max_retries = 5
+        base_wait   = 10  # seconds
+
+        for attempt in range(max_retries):
+            try:
+                response = self._client.chat.completions.create(
+                    model=self._model,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user",   "content": user_prompt},
+                    ],
+                    temperature=self._temperature,
+                    max_tokens=self._max_tokens,
+                )
+                text   = response.choices[0].message.content.strip()
+                tokens = response.usage.total_tokens if response.usage else 0
+                return text, tokens
+
+            except Exception as e:
+                err_str = str(e)
+                is_rate_limit = (
+                    "429" in err_str
+                    or "rate_limit" in err_str.lower()
+                    or "RateLimitError" in type(e).__name__
+                )
+                if is_rate_limit and attempt < max_retries - 1:
+                    # Try to parse retry-after seconds from the error message
+                    m = re.search(r"try again in\s+([\d.]+)s", err_str, re.IGNORECASE)
+                    wait = float(m.group(1)) + 2 if m else base_wait * (2 ** attempt)
+                    print(
+                        f"\n[RateLimitError] Groq/OpenAI rate limit hit. "
+                        f"Waiting {wait:.0f}s before retry {attempt + 1}/{max_retries - 1}..."
+                    )
+                    time.sleep(wait)
+                else:
+                    raise
 
 
 # ─── Anthropic Provider ───────────────────────────────────────────────────────

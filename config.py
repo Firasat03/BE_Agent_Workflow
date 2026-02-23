@@ -22,8 +22,9 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL   = LLM_MODEL   # kept for backward compat
 
 # ─── Retry limits ─────────────────────────────────────────────────────────────
-MAX_DEBUG_RETRIES  = int(os.getenv("MAX_DEBUG_RETRIES", "3"))   # Debugger→Coder→Tester
-MAX_REVIEW_RETRIES = int(os.getenv("MAX_REVIEW_RETRIES", "1"))  # Reviewer→Coder
+MAX_DEBUG_RETRIES        = int(os.getenv("MAX_DEBUG_RETRIES",        "3"))   # Debugger→Coder→Tester
+MAX_REVIEW_RETRIES       = int(os.getenv("MAX_REVIEW_RETRIES",       "1"))  # Reviewer→Coder
+MAX_INTEGRATION_RETRIES  = int(os.getenv("MAX_INTEGRATION_RETRIES",  "2"))  # Integration→Debugger→Coder
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
 BASE_DIR           = Path(__file__).parent
@@ -50,7 +51,9 @@ class Status:
     REVIEWING   = "REVIEWING"
     TESTING     = "TESTING"
     DEBUGGING   = "DEBUGGING"
+    INTEGRATION = "INTEGRATION"  # live build + server + curl tests
     WRITING     = "WRITING"
+    DEVOPS      = "DEVOPS"   # opt-in: only when --devops flag is passed
     DONE        = "DONE"
     FAILED      = "FAILED"
     ABORTED     = "ABORTED"
