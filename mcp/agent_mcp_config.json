@@ -1,0 +1,40 @@
+{
+    "architect": {
+        "servers": [
+            "filesystem",
+            "knowledge-base",
+            "postgres",
+            "swagger"
+        ]
+    },
+    "coder": {
+        "servers": [
+            "filesystem",
+            "knowledge-base"
+        ]
+    },
+    "reviewer": {
+        "servers": [
+            "knowledge-base",
+            "sonarqube"
+        ]
+    },
+    "tester": {
+        "servers": [
+            "filesystem",
+            "shell"
+        ]
+    },
+    "debugger": {
+        "servers": [
+            "knowledge-base",
+            "filesystem"
+        ]
+    },
+    "writer": {
+        "servers": [
+            "filesystem",
+            "github"
+        ]
+    }
+}

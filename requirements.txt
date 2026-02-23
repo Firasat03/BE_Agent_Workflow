@@ -1,0 +1,10 @@
+# ── Core (always required) ────────────────────────────────────────────────────
+rich>=13.7.0
+pydantic>=2.0.0
+pytest>=8.0.0
+pytest-mock>=3.12.0
+
+# ── LLM Providers (install the one you use) ───────────────────────────────────
+google-generativeai>=0.7.0   # LLM_PROVIDER=gemini      (default)
+# openai>=1.30.0             # LLM_PROVIDER=openai | ollama | openai_compat
+# anthropic>=0.25.0          # LLM_PROVIDER=anthropic
