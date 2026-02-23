@@ -55,10 +55,19 @@ Examples:
 def main() -> None:
     args = parse_args()
 
-    # ── Validate API key ──────────────────────────────────────────────────
-    if not os.getenv("GEMINI_API_KEY"):
-        console.print("[red]❌ GEMINI_API_KEY environment variable is not set.[/red]")
-        console.print("Set it with: set GEMINI_API_KEY=<your-key>  (Windows)")
+    # ── Validate API key (provider-aware) ───────────────────────────────
+    provider = os.getenv("LLM_PROVIDER", "gemini").lower().strip()
+    _key_map = {
+        "gemini":        ("GEMINI_API_KEY",    "set GEMINI_API_KEY=<key>"),
+        "openai":        ("OPENAI_API_KEY",     "set OPENAI_API_KEY=<key>"),
+        "openai_compat": ("OPENAI_API_KEY",     "set OPENAI_API_KEY=<key>"),
+        "anthropic":     ("ANTHROPIC_API_KEY",  "set ANTHROPIC_API_KEY=<key>"),
+        "ollama":        (None, None),   # Ollama is local, no key needed
+    }
+    key_name, key_hint = _key_map.get(provider, ("GEMINI_API_KEY", "set GEMINI_API_KEY=<key>"))
+    if key_name and not os.getenv(key_name):
+        console.print(f"[red]❌ {key_name} is not set (provider: {provider})[/red]")
+        console.print(f"Set it with:  {key_hint}")
         sys.exit(1)
 
     # ── Override config from CLI ──────────────────────────────────────────
@@ -68,7 +77,7 @@ def main() -> None:
 
     if args.model is not None:
         import config
-        config.GEMINI_MODEL = args.model
+        config.LLM_MODEL = args.model
 
     # ── --list-runs ───────────────────────────────────────────────────────
     if args.list_runs:
